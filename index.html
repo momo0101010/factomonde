@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FactoMonde — Faits Insolites</title>
+  <meta name="description" content="Découvre des faits insolites fascinants du monde entier, générés par intelligence artificielle." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;700&family=DM+Sans:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #1D9E75;
+      --green-light: #E1F5EE;
+      --green-dark: #0F6E56;
+      --bg: #F7F5F0;
+      --card: #FFFFFF;
+      --text: #1A1A18;
+      --muted: #6B6B65;
+      --border: rgba(0,0,0,0.08);
+      --accent: #FF5733;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(247,245,240,0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px; font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .logo-mark {
+      width: 28px; height: 28px;
+      background: var(--green);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: white;
+    }
+
+    nav { display: flex; gap: 24px; align-items: center; }
+    nav a {
+      font-size: 14px; color: var(--muted);
+      text-decoration: none; transition: color 0.2s;
+    }
+    nav a:hover { color: var(--text); }
+
+    .nav-cta {
+      background: var(--green) !important;
+      color: white !important;
+      padding: 8px 18px;
+      border-radius: 20px;
+      font-size: 13px !important;
+    }
+
+    /* HERO */
+    .hero {
+      padding: 80px 32px 48px;
+      max-width: 720px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 12px; font-weight: 500; letter-spacing: 1px;
+      text-transform: uppercase; color: var(--green-dark);
+      background: var(--green-light);
+      padding: 5px 14px; border-radius: 20px;
+      margin-bottom: 24px;
+    }
+    .hero-tag::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 700;
+      line-height: 1.1;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+    h1 em { font-style: normal; color: var(--green); }
+
+    .hero-sub {
+      font-size: 17px; color: var(--muted);
+      line-height: 1.7; max-width: 480px; margin: 0 auto 40px;
+    }
+
+    /* MAIN CARD */
+    .main-card {
+      max-width: 720px;
+      margin: 0 auto 24px;
+      padding: 0 32px;
+    }
+
+    .fact-container {
+      background: var(--card);
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .fact-top {
+      padding: 32px 36px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .fact-meta {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .category-pill {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.8px;
+      text-transform: uppercase;
+      background: var(--green-light);
+      color: var(--green-dark);
+      padding: 4px 12px; border-radius: 20px;
+    }
+
+    .fact-id {
+      font-size: 12px; color: var(--muted);
+      font-family: 'DM Sans', monospace;
+    }
+
+    .fact-body {
+      font-size: 19px;
+      font-weight: 300;
+      line-height: 1.75;
+      color: var(--text);
+      min-height: 100px;
+      transition: opacity 0.3s;
+    }
+
+    .fact-body.loading { opacity: 0.3; }
+
+    .fact-bottom {
+      padding: 20px 36px;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 16px;
+    }
+
+    .share-row { display: flex; gap: 8px; }
+
+    .share-btn {
+      font-size: 12px; font-weight: 500;
+      padding: 7px 16px; border-radius: 20px;
+      border: 1px solid var(--border);
+      background: transparent; color: var(--muted);
+      cursor: pointer; transition: all 0.15s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .share-btn:hover { border-color: var(--green); color: var(--green); }
+
+    .copy-feedback { font-size: 12px; color: var(--green); opacity: 0; transition: opacity 0.3s; }
+    .copy-feedback.show { opacity: 1; }
+
+    /* GENERATE BUTTON */
+    .generate-wrap {
+      max-width: 720px; margin: 0 auto 48px; padding: 0 32px;
+    }
+
+    .generate-btn {
+      width: 100%;
+      padding: 18px;
+      font-family: 'Syne', sans-serif;
+      font-size: 16px; font-weight: 700;
+      background: var(--green);
+      color: white;
+      border: none; border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+    }
+    .generate-btn:hover { background: var(--green-dark); transform: translateY(-1px); }
+    .generate-btn:active { transform: translateY(0); }
+    .generate-btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+    .btn-icon { font-size: 20px; }
+
+    /* STATS */
+    .stats {
+      max-width: 720px; margin: 0 auto 32px; padding: 0 32px;
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-value {
+      font-family: 'Syne', sans-serif;
+      font-size: 28px; font-weight: 700;
+      color: var(--text);
+    }
+    .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+    /* AD */
+    .ad-zone {
+      max-width: 720px; margin: 0 auto 48px; padding: 0 32px;
+    }
+    .ad-box {
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .ad-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px; }
+
+    /* CATEGORIES */
+    .categories {
+      max-width: 720px; margin: 0 auto 64px; padding: 0 32px;
+    }
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 20px; font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .cat-grid {
+      display: flex; flex-wrap: wrap; gap: 8px;
+    }
+    .cat-btn {
+      padding: 8px 18px; border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--card); color: var(--text);
+      font-size: 13px; cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+    .cat-btn:hover, .cat-btn.active {
+      background: var(--green); color: white; border-color: var(--green);
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 32px;
+      text-align: center;
+      font-size: 13px; color: var(--muted);
+    }
+    footer a { color: var(--green); text-decoration: none; }
+
+    /* SPINNER */
+    .spinner-wrap {
+      position: absolute; inset: 0;
+      background: rgba(255,255,255,0.8);
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.2s;
+      border-radius: 20px;
+    }
+    .spinner-wrap.show { opacity: 1; pointer-events: all; }
+    .spinner {
+      width: 32px; height: 32px;
+      border: 3px solid var(--green-light);
+      border-top-color: var(--green);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 600px) {
+      header { padding: 0 16px; }
+      .hero, .main-card, .generate-wrap, .stats, .ad-zone, .categories { padding-left: 16px; padding-right: 16px; }
+      .fact-top { padding: 24px 20px 20px; }
+      .fact-bottom { padding: 16px 20px; flex-direction: column; align-items: flex-start; }
+      .stats { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      nav a:not(.nav-cta) { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="#" class="logo">
+      <div class="logo-mark">F</div>
+      FactoMonde
+    </a>
+    <nav>
+      <a href="#categories">Catégories</a>
+      <a href="#" class="nav-cta">S'abonner</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-tag">Propulsé par IA</div>
+    <h1>Le monde est <em>insolite</em><br>découvre-le</h1>
+    <p class="hero-sub">Un fait fascinant à chaque clic. Génère des curiosités infinies sur la science, l'histoire, la nature et bien plus.</p>
+  </section>
+
+  <div class="main-card">
+    <div class="fact-container" id="factContainer">
+      <div class="spinner-wrap" id="spinner"><div class="spinner"></div></div>
+      <div class="fact-top">
+        <div class="fact-meta">
+          <span class="category-pill" id="category">Science</span>
+          <span class="fact-id" id="factId">Fait #1</span>
+        </div>
+        <p class="fact-body" id="factBody">
+          Les pieuvres ont trois cœurs : deux pompent le sang vers les branchies, et un seul irrigue le reste du corps. Quand elles nagent, le cœur principal s'arrête, c'est pourquoi elles préfèrent ramper plutôt que nager sur de longues distances.
+        </p>
+      </div>
+      <div class="fact-bottom">
+        <div class="share-row">
+          <button class="share-btn" onclick="copyFact()">📋 Copier</button>
+          <button class="share-btn" onclick="shareTikTok()">🎵 TikTok</button>
+          <button class="share-btn" onclick="shareTwitter()">🐦 Twitter</button>
+        </div>
+        <span class="copy-feedback" id="copyFeedback">Copié !</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="generate-wrap">
+    <button class="generate-btn" id="genBtn" onclick="generateFact()">
+      <span class="btn-icon">✦</span>
+      Nouveau fait insolite
+    </button>
+  </div>
+
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-value" id="countStat">1</div>
+      <div class="stat-label">Faits générés</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">8</div>
+      <div class="stat-label">Catégories</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">∞</div>
+      <div class="stat-label">Curiosités</div>
+    </div>
+  </div>
+
+  <div class="ad-zone">
+    <div class="ad-box">
+      <div class="ad-label">Publicité</div>
+      <div>Emplacement Google AdSense — 728×90</div>
+    </div>
+  </div>
+
+  <div class="categories" id="categories">
+    <div class="section-title">Explorer par catégorie</div>
+    <div class="cat-grid" id="catGrid"></div>
+  </div>
+
+  <footer>
+    <p>© 2025 <strong>FactoMonde</strong> — Faits insolites générés par IA</p>
+    <p style="margin-top:8px;"><a href="#">Politique de confidentialité</a> · <a href="#">Contact</a></p>
+  </footer>
+
+  <script>
+    const CATEGORIES = ["Tous","Science","Histoire","Nature","Technologie","Psychologie","Espace","Animaux","Géographie"];
+    const FALLBACKS = [
+      { cat: "Animaux", text: "Les dauphins donnent des prénoms à leurs congénères. Chaque dauphin développe dès sa naissance un sifflement unique qui lui sert d'identifiant, et les autres membres du groupe l'utilisent pour l'appeler directement." },
+      { cat: "Histoire", text: "Cléopâtre a vécu chronologiquement plus proche de nous que des pyramides. Les pyramides de Gizeh ont été construites il y a 4 500 ans, tandis que Cléopâtre est morte il y a seulement 2 000 ans." },
+      { cat: "Espace", text: "Une journée sur Vénus dure plus longtemps qu'une année vénusienne. La planète tourne si lentement sur elle-même qu'elle effectue un tour complet du Soleil avant d'avoir terminé une rotation sur son axe." },
+      { cat: "Science", text: "L'eau chaude peut geler plus vite que l'eau froide dans certaines conditions. Ce phénomène contre-intuitif est connu sous le nom d'effet Mpemba, et les scientifiques débattent encore de son explication exacte." },
+      { cat: "Nature", text: "Les arbres d'une même forêt communiquent via un réseau souterrain de champignons appelé mycorhize. Ce réseau leur permet de partager des nutriments et même d'envoyer des signaux d'alerte en cas d'attaque de parasites." },
+      { cat: "Psychologie", text: "Le cerveau humain est incapable de distinguer un souvenir réel d'un souvenir imaginé de manière suffisamment vivace. C'est ce mécanisme qui explique l'existence des faux souvenirs, qui semblent pourtant parfaitement authentiques." },
+      { cat: "Technologie", text: "Le premier message envoyé sur internet en 1969 a planté le système après seulement deux lettres. Les ingénieurs tentaient d'envoyer 'LOGIN', mais le réseau ARPANET s'est effondré après la lettre 'L' et 'O'." },
+      { cat: "Géographie", text: "Le Canada possède plus de lacs que tous les autres pays réunis. On estime à plus de 2 millions le nombre de lacs sur son territoire, soit environ 60% des lacs d'eau douce de la planète." },
+    ];
+
+    let count = 1;
+    let selectedCat = "Tous";
+    let usedFallbacks = new Set([0]);
+
+    // Build category buttons
+    const catGrid = document.getElementById('catGrid');
+    CATEGORIES.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = 'cat-btn' + (cat === 'Tous' ? ' active' : '');
+      btn.textContent = cat;
+      btn.onclick = () => {
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedCat = cat;
+        generateFact();
+      };
+      catGrid.appendChild(btn);
+    });
+
+    async function generateFact() {
+      const spinner = document.getElementById('spinner');
+      const btn = document.getElementById('genBtn');
+      const body = document.getElementById('factBody');
+
+      spinner.classList.add('show');
+      btn.disabled = true;
+      btn.innerHTML = '<span class="btn-icon">⟳</span> Génération en cours...';
+      body.classList.add('loading');
+
+      const catPrompt = selectedCat !== 'Tous' ? `La catégorie doit être : ${selectedCat}.` : '';
+
+      try {
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            model: "claude-sonnet-4-20250514",
+            max_tokens: 1000,
+            messages: [{
+              role: "user",
+              content: `Génère un fait insolite fascinant et surprenant en français. ${catPrompt} Réponds UNIQUEMENT en JSON valide sans backticks ni preamble: {"category": "une parmi Science|Histoire|Nature|Technologie|Psychologie|Espace|Animaux|Géographie", "fact": "2-3 phrases captivantes et précises sur ce fait insolite"}`
+            }]
+          })
+        });
+        const data = await res.json();
+        const text = data.content.map(i => i.text || "").join("");
+        const parsed = JSON.parse(text.trim());
+        document.getElementById('category').textContent = parsed.category;
+        body.textContent = parsed.fact;
+      } catch(e) {
+        let idx;
+        const pool = selectedCat === 'Tous' ? FALLBACKS : FALLBACKS.filter(f => f.cat === selectedCat);
+        const source = pool.length > 0 ? pool : FALLBACKS;
+        do { idx = Math.floor(Math.random() * source.length); } while (usedFallbacks.has(idx) && usedFallbacks.size < source.length);
+        if (usedFallbacks.size >= source.length) usedFallbacks.clear();
+        usedFallbacks.add(idx);
+        document.getElementById('category').textContent = source[idx].cat;
+        body.textContent = source[idx].text;
+      }
+
+      count++;
+      document.getElementById('countStat').textContent = count;
+      document.getElementById('factId').textContent = `Fait #${count}`;
+      body.classList.remove('loading');
+      spinner.classList.remove('show');
+      btn.disabled = false;
+      btn.innerHTML = '<span class="btn-icon">✦</span> Nouveau fait insolite';
+    }
+
+    function copyFact() {
+      const text = document.getElementById('factBody').textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        const fb = document.getElementById('copyFeedback');
+        fb.classList.add('show');
+        setTimeout(() => fb.classList.remove('show'), 2000);
+      });
+    }
+
+    function shareTikTok() {
+      const text = document.getElementById('factBody').textContent;
+      navigator.clipboard.writeText("🌍 Fait insolite :\n\n" + text + "\n\n#factinsolite #culture #insolite #apprendreensemble");
+      alert("Texte copié ! Colle-le dans ta vidéo TikTok 🎵");
+    }
+
+    function shareTwitter() {
+      const text = document.getElementById('factBody').textContent;
+      const url = encodeURIComponent(window.location.href);
+      const tweet = encodeURIComponent("🌍 Fait insolite du jour :\n\n" + text.substring(0, 200) + "...\n\n#factinsolite #culture");
+      window.open("https://twitter.com/intent/tweet?text=" + tweet, "_blank");
+    }
+  </script>
+</body>
+</html>
